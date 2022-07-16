@@ -24,3 +24,9 @@ This projects relies on [pyenv](https://github.com/pyenv/pyenv) and [Poetry](htt
    ```bash
    poetry run python -m app.data.prepare_agnews
    ```
+
+4. Evaluate the prepared models
+
+   ```bash
+   poetry run python -m app.eval
+   ```
