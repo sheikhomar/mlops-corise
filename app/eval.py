@@ -4,7 +4,7 @@ import click
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, classification_report
 from tqdm import tqdm
 
 
@@ -26,6 +26,7 @@ class Evaluation:
 
         X_train, y_train = train_data["features"], train_data["labels"]
         X_test, y_test = test_data["features"], test_data["labels"]
+        class_names = train_data["class_names"]
 
         results = dict()
 
@@ -46,7 +47,11 @@ class Evaluation:
                 'f1': f1_score(y_test, Y_pred_i, average='weighted'),
                 'errors': sum([x != y for (x, y) in zip(y_test, Y_pred_i)])
             }
-            print(f"  Accuracy on test set: {results[train_size]['accuracy']}")
+            print(classification_report(y_test, Y_pred_i, target_names=class_names))
+        
+        print(f"\nSummary of results:\n===================\n")
+        for n_points, info in results.items():
+            print(f" Train size: {n_points:5d}  |  Accuracy: {info['accuracy']:0.4f}  |  F1 score: {info['f1']:0.4f}  |  Error count: {info['errors']}")
         
 
 @click.command(help="Evaluation.")
