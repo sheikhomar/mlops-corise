@@ -67,6 +67,16 @@ class AverageWordVectorFeaturizer(BaseEstimator, TransformerMixin):
         return np.array(X_t)
 
 
+def get_data_splits_from_zip_file(zip_path: Path) -> None:
+    data_splits = {}
+    with zipfile.ZipFile(zip_path, "r") as z:
+        for split in ["train", "test", "augment"]:
+            print(f"Reading {split}.json from {zip_path}...")
+            with z.open(f"{split}.json") as f:
+                data_splits[split] = json.load(f)
+    return data_splits
+
+
 class DataPreparation:
     def __init__(self, download_url: str, output_dir: str,) -> None:
         self._download_url = download_url
@@ -76,7 +86,7 @@ class DataPreparation:
         raw_path = self._output_dir / "raw" / "agnews.zip"
         if not raw_path.exists():
             self._download_file(self._download_url, raw_path)
-        data_splits = self._get_data_splits_from_zip_file(raw_path)
+        data_splits = get_data_splits_from_zip_file(raw_path)
         docs_map, labels_map = self._get_docs_and_labels(data_splits)
 
         self._process_features_and_labels(
@@ -125,15 +135,6 @@ class DataPreparation:
             labels[split_name] = [item["label"] for item in data_splits[split_name]]
             print(f"Read {len(docs[split_name])} documents from the {split_name} split.")
         return docs, labels
-
-    def _get_data_splits_from_zip_file(self, zip_path: Path) -> None:
-        data_splits = {}
-        with zipfile.ZipFile(zip_path, "r") as z:
-            for split in ["train", "test", "augment"]:
-                print(f"Reading {split}.json from {zip_path}...")
-                with z.open(f"{split}.json") as f:
-                    data_splits[split] = json.load(f)
-        return data_splits
 
     def _download_file(self, url: str, output_path: Path) -> None:
         """Downloads a file from a url and saves it to a local path."""
