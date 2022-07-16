@@ -18,3 +18,9 @@ This projects relies on [pyenv](https://github.com/pyenv/pyenv) and [Poetry](htt
    ```bash
    poetry install --no-dev
    ```
+
+3. Prepare the AG News data set
+
+   ```bash
+   poetry run python -m app.data.prepare_agnews
+   ```
