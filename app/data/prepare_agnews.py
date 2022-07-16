@@ -115,7 +115,7 @@ class DataPreparation:
             y = label_encoder.fit_transform(labels)
             features = featurizer.fit_transform(docs, labels)
             print(f"Storing Numpy data to {split_path}...")
-            np.savez(split_path, features=features, labels=y, class_names=label_encoder.classes_)
+            np.savez_compressed(split_path, features=features, labels=y, class_names=label_encoder.classes_)
 
     def _get_docs_and_labels(self, data_splits: dict) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
         """Extract descriptions and corresponding labels for each data split.   """
