@@ -1,5 +1,6 @@
 import json
 import zipfile
+import re
 
 from typing import Callable, Dict, List, Tuple
 from pathlib import Path
@@ -28,13 +29,13 @@ class TransformerFeaturizer(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         print(f"Transforming {len(X)} documents to word vectors based on Transformer model '{self._model_name}'...")
-        X_t = []
-        with tqdm(total=len(X)) as pbar:
-          for doc in X:
-              embeddings = self._model.encode(doc)
-              X_t.append(embeddings)
-              pbar.update()
-        return np.array(X_t)
+        return self._model.encode(
+            sentences=X,
+            normalize_embeddings=True,
+            show_progress_bar=True,
+            batch_size=256,
+            device="cuda:0"
+        )
 
 
 class AverageWordVectorFeaturizer(BaseEstimator, TransformerMixin):
@@ -131,8 +132,15 @@ class DataPreparation:
         """Extract descriptions and corresponding labels for each data split.   """
         docs, labels = {}, {}
         for split_name in data_splits:
-            docs[split_name] = [item["description"] for item in data_splits[split_name]]
-            labels[split_name] = [item["label"] for item in data_splits[split_name]]
+            docs[split_name] = []
+            labels[split_name] = []
+            for item in data_splits[split_name]:
+                desc, label = item["description"].strip(), item["label"]
+                if len(desc) > 0:
+                    docs[split_name].append(desc)
+                    labels[split_name].append(label)
+                else:
+                    print(f"Discarding item because description is empty for item\n {item}")
             print(f"Read {len(docs[split_name])} documents from the {split_name} split.")
         return docs, labels
 
